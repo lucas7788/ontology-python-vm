@@ -40,4 +40,14 @@ class StructItem(StackItems):
     def count(self):
         return len(self.stack_items)
 
+    def clone(self, item: StackItems):
+        i = 0
+        return StructItem
+
+    def clone2(self):
+        pass
+
+
+
+
 

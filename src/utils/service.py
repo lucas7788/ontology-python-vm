@@ -1,3 +1,6 @@
+import json
+import time
+
 from ontology.common.address import Address
 from ontology.io.binary_writer import BinaryWriter
 from ontology.io.memory_stream import StreamManager
@@ -28,19 +31,30 @@ class Service(object):
             raise e
 
     def storage_put(self, config: Config, engine: ExecutionEngine):
+        print("*********storage_put:")
         item = PushData.pop_interop_interface(engine)
         key = PushData.pop_bytearray(engine)
         value = PushData.pop_bytearray(engine)
-        config.get_storage_map()[item.value.decode('utf-8') + key.decode('utf-8')] = value
+        storage_map = config.get_storage_map()
+        storage_map[item.value.hex() + key.hex()] = value.hex()
+        date = time.strftime('%Y-%m-%d', time.localtime(time.time()))
+        with open(date+'.json', "w") as f:
+            json.dump(storage_map, f, default=lambda obj: dict(obj), indent=4)
 
     def storage_get_context(self, config: Config, engine: ExecutionEngine):
         PushData.push_data(engine, InteropItem(config.contract_address.encode('utf-8')))
 
     def storage_get(self, config: Config, engine: ExecutionEngine):
+        if len(engine.evaluation_stack.e) < 2:
+            raise RuntimeError("evaluation stack size less than 2")
         item = PushData.pop_interop_interface(engine)
         key = PushData.pop_bytearray(engine)
-        value = config.get_storage_map()[item.value.decode('utf-8') + key.decode('utf-8')]
-        if value is None:
+        storage_map = config.get_storage_map()
+        value = bytearray()
+        if len(storage_map) != 0:
+            temp = storage_map.get(item.value.hex() + key.hex(), '')
+            value = bytearray.fromhex(temp)
+        if value is None or value == '':
             value = bytearray()
         PushData.push_data(engine, value)
 
@@ -70,9 +84,10 @@ class Service(object):
 
     def runtime_serialize(self, config: Config, engine: ExecutionEngine):
         t = PushData.pop_stack_item(engine)
-        writer = BinaryWriter(StreamManager.GetStream())
-        baos = self.__serialize_stack_item(t, writer)
-        PushData.push_data(engine, baos.stream.ToArray())
+        stream = StreamManager.GetStream()
+        writer = BinaryWriter(stream)
+        self.__serialize_stack_item(t, writer)
+        PushData.push_data(engine, stream.ToArray())
 
     def __serialize_stack_item(self, item: StackItems, writer: BinaryWriter):
         if type(item) == ByteArrayItem:
@@ -152,7 +167,7 @@ class Service(object):
             for i in range(len(item.get_array())):
                 obj = self.__convert_neovm_type_hex_str(item.get_array()[i])
                 l.append(obj)
-            l.__setitem__(0, l[0] + "(" + l[0] + ")")
+            # l.__setitem__(0, l[0] + "(" + l[0] + ")")
             return l
         elif type(item) == StructItem:
             pass

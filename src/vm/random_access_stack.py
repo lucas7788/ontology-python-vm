@@ -27,9 +27,9 @@ class RandomAccessStack(object):
             if type(self.e[i]) == ByteArrayItem:
                 class_name = class_name + "(" + self.e[i].get_bytearray().hex() + ")"
             elif type(self.e[i]) == IntegerItem:
-                class_name = class_name + "(" + self.e[i].get_biginteger() + ")"
+                class_name = class_name + "(" + str(self.e[i].get_biginteger()) + ")"
             elif type(self.e[i]) == BoolItem:
-                class_name = class_name + "(" + self.e[i].get_bool() + ")"
+                class_name = class_name + "(" + str(self.e[i].get_bool()) + ")"
             elif type(self.e[i]) == ArrayItem:
                 arr = self.e[i].stack_items
                 class_name = class_name + "["
@@ -37,9 +37,9 @@ class RandomAccessStack(object):
                     if type(arr[j]) == ByteArrayItem:
                         class_name = class_name + "ByteArray:" + arr[j].get_bytearray().hex()
                     elif type(arr[j]) == IntegerItem:
-                        class_name = class_name + "Integer:" + arr[j].get_biginteger()
+                        class_name = class_name + "Integer:" + str(arr[j].get_biginteger())
                     elif type(arr[j]) == BoolItem:
-                        class_name = class_name + "Bool:" + arr[j].get_bool()
+                        class_name = class_name + "Bool:" + str(arr[j].get_bool())
                     elif type(arr[j]) == ArrayItem:
                         class_name = class_name + "ArrayItem"
                     if j < len(arr) - 1:
@@ -64,7 +64,7 @@ class RandomAccessStack(object):
         if index >= l:
             return None
         index = l- index
-        return self.e[index -1]
+        return self.e[index - 1]
 
     def remove(self, index: int):
         if index > len(self.e):

@@ -17,5 +17,5 @@ class BoolItem(StackItems):
 
     def get_bytearray(self):
         if self.value:
-            return bytearray(1)
-        return bytearray(0)
+            return bytearray([1])
+        return bytearray([0])
